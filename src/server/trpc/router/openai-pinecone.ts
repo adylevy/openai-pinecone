@@ -99,6 +99,15 @@ export const openAiPinecone = router({
       });
       let completion;
       let prompt;
+
+      const completionCache = await prisma.completion.findFirst({
+        where: { externalId: id, query: query },
+      });
+
+      if (completionCache) {
+        return { ok: true, query, id, completion: completionCache.response };
+      }
+
       if (item) {
         prompt = `Given  the court case below answer the following : \
         1. why is this a good candidate for a DUI case with minor involved? \
@@ -109,6 +118,13 @@ export const openAiPinecone = router({
         {${item?.casebody?.data?.opinions?.[0]?.text}}`;
 
         completion = await getCompletion(prompt);
+        await prisma.completion.create({
+          data: {
+            externalId: id,
+            query: query,
+            response: completion,
+          },
+        });
       }
       return { ok: true, query, id, completion };
     }),

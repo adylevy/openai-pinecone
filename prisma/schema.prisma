@@ -113,3 +113,10 @@ model Library {
 
   @@index([externalId])
 }
+
+model Completion { 
+  id  String     @id @default(cuid()) @map("_id")
+  externalId        String
+  query String
+  response       Json
+}
