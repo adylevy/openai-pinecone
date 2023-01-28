@@ -110,7 +110,7 @@ export const openAiPinecone = router({
 
       if (item) {
         prompt = `Given  the court case below answer the following : \
-        1. why is this a good candidate for a DUI case with minor involved? \
+        1. why is this a good candidate for a ${query}? \
         2. is there a precedence decision here? \
         3. provide a short summary of the case \
         \
