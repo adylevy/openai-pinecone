@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/**/*.ts": {
+    "api/trpc/openAiPinecone.elaborate": {
       "maxDuration": 60
     }
   }
