@@ -18,6 +18,7 @@ const Search = () => {
   const { register, handleSubmit } = useForm<Inputs>();
   const [elaborateId, setElaborateId] = useState<string>('');
   const [query, setQuery] = useState<string>('');
+  const [elaborateLoading, setElaborateLoading] = useState<any>(null);
   const [elaborateData, setElaborateData] = useState<any>(null);
   const { mutateAsync, data, isLoading } =
     trpc.openAiPinecone.searchEmbedding.useMutation();
@@ -25,11 +26,13 @@ const Search = () => {
     const elaborateQuery = trpc.openAiPinecone.elaborate.useQuery( { query: query, id: elaborateId }, {
       enabled: Boolean(elaborateId),
       onSuccess: (data:any) => {
+        setElaborateLoading(null);
         setElaborateData(data);
       }
     });
 
   const elaborate =  ({  id }: {  id: string}) => {
+    setElaborateLoading(id);
     setElaborateId(id)
   }
     
@@ -106,13 +109,13 @@ const Search = () => {
                     type="button"
                     className="relative -ml-px inline-flex items-center space-x-2 rounded-r-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                     onClick={() => elaborate({ id: item.externalId})}
-                    disabled={isLoading}
+                    disabled={elaborateLoading === item.externalId  }
                   >
                     <MagnifyingGlassIcon
                       className="h-5 w-5 text-gray-400"
                       aria-hidden="true"
                     />
-                    <span>{isLoading ? "Loading" : "Get More info"}</span>
+                    <span>{elaborateLoading === item.externalId ? "Loading" : "Get More info"}</span>
                   </button>
                 </div>
               );
