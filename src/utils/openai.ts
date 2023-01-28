@@ -18,6 +18,9 @@ export async function createEmbedding(text: string) {
 
 export async function getCompletion(text: string) {
   try {
+    if (text.length > 3000) {
+      text = text.substring(0, 3000) + "...";
+    }
     const response = await openai.createCompletion(
       {
         model: "text-davinci-003",

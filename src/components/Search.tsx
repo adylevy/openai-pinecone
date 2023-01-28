@@ -102,7 +102,7 @@ const Search = () => {
                       {item.casebody?.data?.opinions?.[0]?.text}
                     </p>
                     <p>
-                      {elaborateData && elaborateData.id === item.externalId && elaborateData.completion ? elaborateData.completion.choices[0].text : ''}
+                      {elaborateData && elaborateData.id === item.externalId && elaborateData.completion && elaborateData.completion.choices ? elaborateData.completion.choices[0].text : ''}
                     </p>
                   </div>
                   <button
