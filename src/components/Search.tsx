@@ -64,8 +64,8 @@ const Search = () => {
         {isLoading ? (
           <LoadingResults />
         ) : (
-          data?.pineconeSearch.matches?.map((item) => {
-            if (item.metadata.text) {
+          data?.library?.map((item) => {
+            if (item.name) {
               return (
                 <div
                   className="m-5 w-full bg-white shadow sm:rounded-lg"
@@ -73,10 +73,13 @@ const Search = () => {
                 >
                   <div className="flex flex-col items-center px-4 py-5 sm:px-6">
                     <h3 className="text-lg font-medium leading-6 text-gray-900">
-                      {item.metadata.title}
+                      {item.name}
                     </h3>
-                    <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                      {item.metadata.text}
+                    <a href={item.frontend_url} target="_blank" className="mt-1 max-w-2xl text-sm text-gray-500" rel="noreferrer">
+                      {item.frontend_url}
+                    </a>
+                    <p className="mt-1 max-w-2xl text-sm scrollable-text text-gray-500">
+                      {item.casebody?.data?.opinions?.[0]?.text}
                     </p>
                   </div>
                 </div>

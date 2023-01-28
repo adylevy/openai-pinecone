@@ -106,10 +106,10 @@ const Library = () => {
               >
                 <div className="flex flex-col items-center px-4 py-5 sm:px-6">
                   <h3 className="text-lg font-medium leading-6 text-gray-900">
-                    {library.title}
+                    {library.name}
                   </h3>
                   <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                    {library.description}
+                    {library.url}
                   </p>
                 </div>
               </div>

@@ -70,19 +70,23 @@ export const openAiPinecone = router({
           {
             id,
             values: vectorEmbedding,
-            metadata: { userId: ctx.session.user.id, text, title },
+            metadata: {
+              id: ctx.session.user.id,
+              name: title,
+              url: "",
+            },
           },
         ],
       });
 
-      await prisma.library.create({
+      /* await prisma.library.create({
         data: {
-          title,
+       
           description: text,
           embeddingId: id,
-          userId: ctx.session.user.id,
+          userId: "cldedmn3m0000wnf1vnm3pzho", //ctx.session.user.id,
         },
-      });
+      });*/
 
       return {
         test: input.text,
@@ -96,14 +100,27 @@ export const openAiPinecone = router({
       const embedding = await createEmbedding(text);
       const vectorEmbedding = embedding.data[0]?.embedding ?? [];
       const pineconeSearch = await pinecone.query({
-        topK: 3,
+        topK: 5,
         includeMetadata: true,
         vector: vectorEmbedding,
-        filter: {
-          userId: ctx.session.user.id,
-        },
+        filter: {},
+        namespace: "legali",
       });
 
-      return { test: input.text, user: ctx.session.user.email, pineconeSearch };
+      const externalIds = pineconeSearch.matches.map((v) => v.metadata.id);
+
+      const library = await prisma.library.findMany({
+        where: {
+          externalId: { in: externalIds },
+        },
+      });
+      console.log(library);
+      return {
+        test: input.text,
+        user: ctx.session.user.email,
+        pineconeSearch,
+        library,
+        externalIds,
+      };
     }),
 });

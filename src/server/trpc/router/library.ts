@@ -4,7 +4,7 @@ export const libraryRouter = router({
   getMyLibrary: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.library.findMany({
       where: {
-        userId: ctx.session.user.id,
+        userId: "cldedmn3m0000wnf1vnm3pzho", //ctx.session.user.id,
       },
     });
   }),
