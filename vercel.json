@@ -1,7 +1,8 @@
 {
   "functions": {
-    "api/trpc/**": {
-      "maxDuration": 60
+    "api/trpc/[functionName].ts": {
+      "maxDuration": 60,
+      "includeFiles": "**/*"
     }
   }
 }
