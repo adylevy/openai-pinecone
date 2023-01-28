@@ -1,9 +1,9 @@
 import { ulid } from "ulid";
 import { z } from "zod";
 import { prisma } from "../../../server/db/client";
-import { createEmbedding } from "../../../utils/openai";
+import { createEmbedding, getCompletion } from "../../../utils/openai";
 import { pinecone } from "../../../utils/pinecone";
-import { protectedProcedure, router } from "../trpc";
+import { protectedProcedure, publicProcedure, router } from "../trpc";
 /*import { runner } from "../../ark_sample";
 
 console.log("runner length", runner.length);
@@ -59,11 +59,8 @@ export const openAiPinecone = router({
     .mutation(async ({ ctx, input }) => {
       const { text, title } = input;
       const id = ulid();
-      console.log(id, text);
       const embedding = await createEmbedding(text);
       const vectorEmbedding = embedding.data[0]?.embedding ?? [];
-      console.log(embedding, vectorEmbedding);
-      console.log(ctx.session.user.id, text, title);
 
       await pinecone.upsert({
         vectors: [
@@ -93,6 +90,28 @@ export const openAiPinecone = router({
         user: ctx.session.user.email,
       };
     }),
+  elaborate: publicProcedure
+    .input(z.object({ query: z.string(), id: z.string() }))
+    .query(async ({ input }) => {
+      const { query, id } = input;
+      const item = await prisma.library.findFirst({
+        where: { externalId: id },
+      });
+      let completion;
+      let prompt;
+      if (item) {
+        prompt = `Given  the court case below answer the following : \
+        1. why is this a good candidate for a DUI case with minor involved? \
+        2. is there a precedence decision here? \
+        3. provide a short summary of the case \
+        \
+        Case: \
+        {${item?.casebody?.data?.opinions?.[0]?.text}}`;
+
+        completion = await getCompletion(prompt);
+      }
+      return { ok: true, query, id, completion };
+    }),
   searchEmbedding: protectedProcedure
     .input(z.object({ text: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -114,7 +133,6 @@ export const openAiPinecone = router({
           externalId: { in: externalIds },
         },
       });
-      console.log(library);
       return {
         test: input.text,
         user: ctx.session.user.email,

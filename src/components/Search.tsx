@@ -7,6 +7,8 @@ import { trpc } from "../utils/trpc";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { LoadingResults } from "./Loading";
+import { useState } from "react";
+import { json } from "stream/consumers";
 
 type Inputs = {
   text: string;
@@ -14,11 +16,26 @@ type Inputs = {
 
 const Search = () => {
   const { register, handleSubmit } = useForm<Inputs>();
-
+  const [elaborateId, setElaborateId] = useState<string>('');
+  const [query, setQuery] = useState<string>('');
+  const [elaborateData, setElaborateData] = useState<any>(null);
   const { mutateAsync, data, isLoading } =
     trpc.openAiPinecone.searchEmbedding.useMutation();
 
+    const elaborateQuery = trpc.openAiPinecone.elaborate.useQuery( { query: query, id: elaborateId }, {
+      enabled: Boolean(elaborateId),
+      onSuccess: (data:any) => {
+        setElaborateData(data);
+      }
+    });
+
+  const elaborate =  ({  id }: {  id: string}) => {
+    setElaborateId(id)
+  }
+    
+
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    setQuery(data.text);
     await mutateAsync({ text: data.text });
   };
 
@@ -41,7 +58,7 @@ const Search = () => {
               name="text"
               id="text"
               className="block w-full rounded-none rounded-l-md border-gray-300 pl-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              placeholder="Cake"
+              placeholder="Driving under influence"
               disabled={isLoading}
             />
           </div>
@@ -81,7 +98,22 @@ const Search = () => {
                     <p className="mt-1 max-w-2xl text-sm scrollable-text text-gray-500">
                       {item.casebody?.data?.opinions?.[0]?.text}
                     </p>
+                    <p>
+                      {elaborateData && elaborateData.id === item.externalId ? elaborateData.completion.choices[0].text : ''}
+                    </p>
                   </div>
+                  <button
+                    type="button"
+                    className="relative -ml-px inline-flex items-center space-x-2 rounded-r-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    onClick={() => elaborate({ id: item.externalId})}
+                    disabled={isLoading}
+                  >
+                    <MagnifyingGlassIcon
+                      className="h-5 w-5 text-gray-400"
+                      aria-hidden="true"
+                    />
+                    <span>{isLoading ? "Loading" : "Get More info"}</span>
+                  </button>
                 </div>
               );
             }
